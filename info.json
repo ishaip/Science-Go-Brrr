@@ -1,0 +1,20 @@
+{
+  "name": "factorio-every-reaserch-costs-one",
+  "version": "1.0.0",
+  "title": "Every Research Costs One",
+  "author": "Your Name",
+  "homepage": "",
+  "description": "Sets all research costs to 1. Every technology requires only 1 cycle with 1 of each science pack needed.",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.0",
+    "? space-age",
+    "? space-exploration",
+    "? Krastorio2"
+  ],
+  "quality_required": false,
+  "space_travel_required": false,
+  "spoiling_required": false,
+  "freezing_required": false,
+  "segmented_units_required": false
+}

@@ -1,0 +1,2 @@
+-- No startup settings needed for this mod
+-- All research costs are always set to 1
