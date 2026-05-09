@@ -1,18 +1,21 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Deployment script for Every Research Costs One mod
-REM Reads name/version from info.json & changelog.txt, packages, and deploys to Factorio mods folder.
+REM Deployment script for Factorio mod
+REM Reads name/version from info.json, validates against changelog.txt, packages, and deploys to Factorio mods folder.
 
-REM Read version from changelog.txt (first occurrence only)
+REM Read version from info.json (source of truth)
 set version=
-for /f "tokens=2" %%a in ('findstr /r "^Version:" changelog.txt 2^>nul') do (
-    if "!version!"=="" set version=%%a
+for /f "tokens=2 delims=:," %%a in ('findstr /r "\"version\":" info.json 2^>nul ^| findstr /v /i "factorio"') do (
+    if "!version!"=="" (
+        set version=%%a
+        set version=!version:"=!
+        set version=!version: =!
+    )
 )
 
 if "!version!"=="" (
-    echo Error: Could not find version in changelog.txt
-    echo Expected format: "Version: x.x.x"
+    echo Error: Could not find version in info.json
     pause
     exit /b 1
 )
@@ -32,15 +35,31 @@ if "!modname!"=="" (
 )
 
 echo Found mod name: !modname!
-echo Found version: !version!
+echo Found version:  !version!
+
+REM Validate that changelog.txt top entry matches info.json version
+set clver=
+for /f "tokens=2" %%a in ('findstr /r "^Version:" changelog.txt 2^>nul') do (
+    if "!clver!"=="" set clver=%%a
+)
+if not "!clver!"=="!version!" (
+    echo WARNING: changelog.txt top version ^(!clver!^) does not match info.json ^(!version!^)
+    echo          Add a changelog entry before deploying.
+    pause
+    exit /b 1
+)
+echo Changelog version matches: !version!
 
 set foldername=!modname!_!version!
 set zipname=!foldername!.zip
 set target=%appdata%\Factorio\mods
 
-REM Remove existing folder and zip if they exist
+REM Remove existing staging folder and any old local zip files
 if exist "!foldername!" rmdir /s /q "!foldername!"
-if exist "!zipname!" del /f /q "!zipname!"
+for /f "delims=" %%z in ('dir /b "!modname!_*.zip" 2^>nul') do (
+    del /f /q "%%z"
+    echo Removed old local zip: %%z
+)
 
 echo Creating mod folder: !foldername!
 
@@ -85,8 +104,26 @@ powershell -Command ^
   "$zip.Dispose(); " ^
   "Write-Host 'Created' $zipPath"
 
+REM Remove only previously script-deployed versions (tracked in log)
+set logfile=!target!\!modname!.deployed.log
+if exist "!logfile!" (
+    echo Removing previously deployed versions...
+    for /f "usebackq delims=" %%f in ("!logfile!") do (
+        if exist "!target!\%%f" (
+            del /f /q "!target!\%%f"
+            echo   Removed: %%f
+        )
+    )
+) else (
+    echo No deployment log found, skipping cleanup.
+)
+
 REM Deploy to Factorio mods folder
 copy /Y "!zipname!" "!target!\!zipname!"
+
+REM Record this deployment in the log
+echo !zipname!>"!logfile!"
+echo Logged: !zipname! ^> !logfile!
 
 REM Clean up temporary folder
 rmdir /s /q "!foldername!"

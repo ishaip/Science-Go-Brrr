@@ -1,3 +1,8 @@
+Version: 1.1.0
+Date: 09. 05. 2026
+  Changes:
+    - Removed explicit mod dependencies (mod works with any science pack without declaring them)
+---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 08. 05. 2026
   - Initial release
