@@ -1,0 +1,5 @@
+Version: 1.0.0
+Date: 08. 05. 2026
+  - Initial release
+  - Sets all research costs to 1
+  - Works with any science pack mod

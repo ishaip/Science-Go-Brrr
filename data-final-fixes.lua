@@ -11,9 +11,9 @@ function calculate(name, technology)
 
     -- Set research count to 1 (or use formula for infinite research)
     if technology.unit.count_formula then
-        -- For infinite research with formulas, we keep the formula but cap minimum at 1
-        technology.unit.count_formula = 'max(1, ' .. technology.unit.count_formula .. ')'
-        log(name .. " : formula-based infinite research adjusted")
+        -- For infinite research with formulas, set it to 1
+        technology.unit.count_formula = '1'
+        log(name .. " : infinite research count formula set to 1")
     elseif technology.unit.count then
         -- For normal research, set count to 1
         local original_count = technology.unit.count
@@ -48,4 +48,4 @@ for name, technology in pairs(data.raw.technology) do
     end, name, technology)
 end
 
-log("Every Research Costs One: All technologies adjusted!")
+log("Science Go Brrr: All technologies adjusted!")
